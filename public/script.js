@@ -1,6 +1,5 @@
 const STORAGE_KEY = "estimChatAuth";
-const DEFAULT_BACKEND_ORIGIN =
-  window.location.port === "5000" ? window.location.origin : "http://localhost:5000";
+const DEFAULT_BACKEND_ORIGIN = window.location.origin;
 const BACKEND_ORIGIN = window.ESTIM_CHAT_BACKEND_ORIGIN || DEFAULT_BACKEND_ORIGIN;
 const API_BASE = `${BACKEND_ORIGIN}/api`;
 
