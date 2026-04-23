@@ -4,79 +4,76 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ESTIM Chat | Connexion</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="login.css" />
   </head>
   <body data-page="login">
-    <main class="auth-shell auth-shell--login">
-      <section class="brand-panel brand-panel--login">
-        <div class="login-visual">
-          <div class="brand-badge brand-badge--login">ESTIM CHAT</div>
-          <div class="login-visual__content">
-            <h1>The Midnight Conductor.</h1>
-            <p>
-              Experience the rhythm of high-end messaging. Where every interaction is
-              orchestrated with surgical precision and professional authority.
-            </p>
-          </div>
+    <main class="auth-showcase">
+      <section class="auth-showcase__visual">
+        <div class="auth-showcase__brand">
+          <img src="Ressource/Logo.jpeg" alt="Logo ESTIM Chat" class="auth-showcase__logo" />
+          <span>ESTIM Chat</span>
+        </div>
 
-          <div class="login-community">
-            <div class="login-community__avatars" aria-hidden="true">
-              <span>A</span>
-              <span>M</span>
-              <span>K</span>
-            </div>
-            <p>Joined by 2,000+ conductors worldwide</p>
-          </div>
+        <img
+          class="auth-showcase__image"
+          src="Ressource/background_register_login.jpg"
+          alt="Illustration ESTIM Chat"
+        />
+
+        <div class="auth-showcase__quote">
+          <p>"Une interface claire pour des échanges plus humains et plus fluides."</p>
+          <strong>Équipe ESTIM Chat</strong>
+          <span>Messagerie collaborative premium</span>
         </div>
       </section>
 
-      <section class="auth-card auth-card--login">
-        <div class="auth-card__header auth-card__header--login">
-          <h2>Welcome Back</h2>
-          <p>Please enter your credentials to continue.</p>
+      <section class="auth-showcase__panel">
+        <div class="auth-showcase__panel-inner">
+          <header class="auth-showcase__header">
+            <h1>Bon retour sur ESTIM Chat</h1>
+            <p>Connectez-vous pour retrouver vos conversations en toute simplicite.</p>
+          </header>
+
+          <form id="login-form" class="auth-showcase__form" novalidate>
+            <label class="auth-showcase__field">
+              <span>Email</span>
+              <input
+                type="email"
+                name="email"
+                placeholder="vous@estimchat.com"
+                autocomplete="email"
+                required
+              />
+            </label>
+
+            <label class="auth-showcase__field">
+              <span>Mot de passe</span>
+              <input
+                type="password"
+                name="password"
+                placeholder="Votre mot de passe"
+                autocomplete="current-password"
+                required
+              />
+            </label>
+
+            <div class="auth-showcase__row">
+              <a href="#" class="auth-showcase__link">Mot de passe oublie ?</a>
+              <label class="auth-showcase__remember">
+                <span>Rester connecte</span>
+                <input type="checkbox" checked />
+                <span class="auth-showcase__toggle"></span>
+              </label>
+            </div>
+
+            <button type="submit" class="auth-showcase__submit">Connexion</button>
+          </form>
+          <p class="auth-showcase__footer">
+            Vous n'avez pas de compte ? <a href="register.html">Inscription</a>
+          </p>
+
+          <p id="auth-message" class="message-box" aria-live="polite"></p>
         </div>
-
-        <div class="oauth-grid oauth-grid--login">
-          <a class="btn btn-secondary oauth-btn oauth-btn--login" href="/api/auth/google">Google</a>
-          <a class="btn btn-secondary oauth-btn oauth-btn--login" href="/api/auth/apple">Apple</a>
-        </div>
-
-        <div class="separator separator--login"><span>Or email login</span></div>
-
-        <form id="login-form" class="auth-form auth-form--login">
-          <label class="auth-field auth-field--icon">
-            <div class="auth-field__row">
-              <span>Work email</span>
-            </div>
-            <div class="input-shell">
-              <span class="input-icon" aria-hidden="true">@</span>
-              <input type="email" name="email" placeholder="name@company.com" required />
-            </div>
-          </label>
-
-          <label class="auth-field auth-field--icon">
-            <div class="auth-field__row">
-              <span>Password</span>
-              <a class="inline-link" href="#">Forgot?</a>
-            </div>
-            <div class="input-shell input-shell--trailing">
-              <span class="input-icon" aria-hidden="true">•</span>
-              <input type="password" name="password" placeholder="••••••••" required />
-              <button class="ghost-toggle" type="button" aria-label="Afficher le mot de passe">
-                ○
-              </button>
-            </div>
-          </label>
-
-          <button type="submit" class="btn btn-primary btn-primary--login">Sign In</button>
-        </form>
-
-        <p class="switch-link switch-link--login">
-          Don't have an account? <a href="register.html">Start Conducting</a>
-        </p>
-
-        <p id="auth-message" class="message-box" aria-live="polite"></p>
-        <p class="login-footer">Secure end-to-end encrypted access</p>
       </section>
     </main>
 

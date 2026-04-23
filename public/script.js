@@ -276,6 +276,7 @@ async function initLogin() {
 
 async function initRegister() {
   redirectIfAuthenticated();
+  handleOAuthPayload();
 
   document.getElementById("register-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -646,7 +647,7 @@ function renderChatUser(user) {
   const headerName = document.createElement("strong");
   headerName.textContent = user.username;
   const headerEmail = document.createElement("div");
-  headerEmail.textContent = "Verified identity · Secure channel";
+  headerEmail.textContent = "Identite verifiee · canal securise";
   headerMeta.append(headerName, headerEmail);
 
   header.append(createAvatar(user), headerMeta);
@@ -793,3 +794,4 @@ async function bootstrap() {
 }
 
 bootstrap();
+

@@ -2,7 +2,6 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const AppleStrategy = require("passport-apple");
 const User = require("../models/User");
 
@@ -48,45 +47,6 @@ function isValidEmail(email) {
 }
 
 function registerOAuthStrategies() {
-  const googleReady =
-    process.env.GOOGLE_CLIENT_ID &&
-    process.env.GOOGLE_CLIENT_SECRET &&
-    process.env.GOOGLE_CALLBACK_URL;
-
-  if (googleReady) {
-    passport.use(
-      new GoogleStrategy(
-        {
-          clientID: process.env.GOOGLE_CLIENT_ID,
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: process.env.GOOGLE_CALLBACK_URL
-        },
-        async (accessToken, refreshToken, profile, done) => {
-          try {
-            const email = profile.emails?.[0]?.value;
-            if (!email) {
-              return done(new Error("Google n'a retourne aucun email."));
-            }
-
-            let user = await User.findOne({ email });
-            if (!user) {
-              user = await User.create({
-                username: profile.displayName || email.split("@")[0],
-                email,
-                avatar: profile.photos?.[0]?.value || getAvatarSeed(profile.displayName || email),
-                provider: "google"
-              });
-            }
-
-            return done(null, user);
-          } catch (error) {
-            return done(error);
-          }
-        }
-      )
-    );
-  }
-
   const appleReady =
     process.env.APPLE_CLIENT_ID &&
     process.env.APPLE_TEAM_ID &&
@@ -149,11 +109,6 @@ passport.deserializeUser(async (id, done) => {
 
 router.get("/status", (req, res) => {
   res.json({
-    google: Boolean(
-      process.env.GOOGLE_CLIENT_ID &&
-        process.env.GOOGLE_CLIENT_SECRET &&
-        process.env.GOOGLE_CALLBACK_URL
-    ),
     apple: Boolean(
       process.env.APPLE_CLIENT_ID &&
         process.env.APPLE_TEAM_ID &&
@@ -235,28 +190,6 @@ router.post("/login", async (req, res) => {
     return res.status(500).json({ message: "Erreur serveur pendant la connexion." });
   }
 });
-
-router.get("/google", (req, res, next) => {
-  if (
-    !process.env.GOOGLE_CLIENT_ID ||
-    !process.env.GOOGLE_CLIENT_SECRET ||
-    !process.env.GOOGLE_CALLBACK_URL
-  ) {
-    return res
-      .status(503)
-      .send("OAuth Google non configure. Ajoutez les variables dans .env.");
-  }
-
-  return passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
-});
-
-router.get(
-  "/google/callback",
-  passport.authenticate("google", { session: false, failureRedirect: "/login.html?oauth=failed" }),
-  (req, res) => {
-    res.type("html").send(buildOAuthCompletionPage(req.user));
-  }
-);
 
 router.get("/apple", (req, res, next) => {
   if (
