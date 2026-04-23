@@ -7,41 +7,70 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body data-page="inbox">
-    <main class="app-layout">
-      <aside class="sidebar">
-        <div class="sidebar__top">
-          <div>
-            <p class="eyebrow">Messagerie</p>
-            <h1>Conversations</h1>
-          </div>
-          <div class="sidebar__actions">
-            <span id="global-unread-badge" class="top-badge"></span>
-            <a class="icon-link" href="profile.html" title="Profil">Profil</a>
-          </div>
+    <main class="app-layout app-layout--inbox">
+      <aside class="sidebar sidebar--nav">
+        <div class="sidebar-brand">
+          <div class="brand-badge brand-badge--sidebar">ESTIM CHAT</div>
+          <p>The Midnight Conductor</p>
         </div>
 
-        <label class="search-box">
-          <input id="contact-search" type="search" placeholder="Rechercher un contact..." />
-        </label>
+        <a class="btn btn-primary btn-primary--sidebar" href="profile.html">New Message</a>
 
-        <section class="panel-block">
-          <div class="panel-block__title">Conversations recentes</div>
-          <div id="conversation-list" class="conversation-list"></div>
-        </section>
+        <nav class="sidebar-menu" aria-label="Navigation principale">
+          <a class="sidebar-menu__item is-active" href="inbox.html">Messages</a>
+          <a class="sidebar-menu__item" href="profile.html">Contacts</a>
+          <button class="sidebar-menu__item" type="button">Groups</button>
+          <button class="sidebar-menu__item" type="button">Archive</button>
+        </nav>
 
-        <section class="panel-block">
-          <div class="panel-block__title">Contacts</div>
-          <div id="contact-list" class="contact-list"></div>
-        </section>
+        <div class="sidebar-spacer"></div>
+
+        <button class="sidebar-menu__item sidebar-menu__item--muted" type="button">Settings</button>
+
+        <a class="sidebar-profile" href="profile.html">
+          <div class="sidebar-profile__avatar">JT</div>
+          <div class="sidebar-profile__meta">
+            <strong>Julian Thorne</strong>
+            <span>Premium Member</span>
+          </div>
+        </a>
       </aside>
 
-      <section class="empty-state">
-        <div class="empty-state__card">
-          <h2>Choisissez une discussion</h2>
-          <p>
-            Selectionnez un contact dans la liste pour ouvrir la conversation en temps reel.
-          </p>
-        </div>
+      <section class="inbox-shell">
+        <section class="inbox-panel">
+          <header class="inbox-panel__header">
+            <div>
+              <h1>Recent Enquiries</h1>
+              <p>Vos conversations securisees, sans appel audio ni video.</p>
+            </div>
+            <span id="global-unread-badge" class="top-badge top-badge--inbox"></span>
+          </header>
+
+          <label class="search-box search-box--inbox">
+            <input id="contact-search" type="search" placeholder="Search conversations..." />
+          </label>
+
+          <section class="panel-block panel-block--inbox">
+            <div class="panel-block__title">Conversations</div>
+            <div id="conversation-list" class="conversation-list conversation-list--inbox"></div>
+          </section>
+
+          <section class="panel-block panel-block--inbox">
+            <div class="panel-block__title">Contacts</div>
+            <div id="contact-list" class="contact-list contact-list--inbox"></div>
+          </section>
+        </section>
+
+        <section class="empty-state empty-state--inbox">
+          <div class="empty-state__card empty-state__card--inbox">
+            <div class="empty-state__eyebrow">Secure channel</div>
+            <h2>Choisissez une discussion</h2>
+            <p>
+              Ouvrez une conversation pour envoyer du texte, des photos ou des videos dans
+              une session chiffree de bout en bout.
+            </p>
+          </div>
+        </section>
       </section>
     </main>
 

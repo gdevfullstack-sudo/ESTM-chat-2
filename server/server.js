@@ -124,10 +124,10 @@ io.on("connection", async (socket) => {
     socket.join(room);
   });
 
-  socket.on("message:send", async ({ receiverId, message, imageUrl, messageId, createdAt }) => {
+  socket.on("message:send", async ({ receiverId, message, imageUrl, videoUrl, messageId, createdAt }) => {
     const trimmedMessage = (message || "").trim();
 
-    if (!receiverId || (!trimmedMessage && !imageUrl)) {
+    if (!receiverId || (!trimmedMessage && !imageUrl && !videoUrl)) {
       return;
     }
 
@@ -138,15 +138,19 @@ io.on("connection", async (socket) => {
       receiverId,
       message: trimmedMessage,
       imageUrl: imageUrl || "",
+      videoUrl: videoUrl || "",
       isSeen: false,
       createdAt: createdAt || new Date().toISOString()
     });
 
+    const previewMessage = trimmedMessage || (videoUrl ? "Video envoyee" : imageUrl ? "Photo envoyee" : "");
+
     const targetSockets = onlineUsers.get(receiverId);
     io.to(socket.id).emit("conversation:update", {
       from: socket.user.toSafeObject(),
-      message: trimmedMessage || "Image envoyee",
+      message: previewMessage,
       imageUrl: imageUrl || "",
+      videoUrl: videoUrl || "",
       createdAt: createdAt || new Date().toISOString()
     });
 
@@ -154,8 +158,9 @@ io.on("connection", async (socket) => {
       targetSockets.forEach((targetSocketId) => {
         io.to(targetSocketId).emit("conversation:update", {
           from: socket.user.toSafeObject(),
-          message: trimmedMessage || "Image envoyee",
+          message: previewMessage,
           imageUrl: imageUrl || "",
+          videoUrl: videoUrl || "",
           createdAt: createdAt || new Date().toISOString()
         });
       });
@@ -245,7 +250,14 @@ async function startServer() {
       insecureDefaults.has(process.env[key])
     );
     if (weakSecrets.length > 0) {
-      throw new Error(`Secrets trop faibles: ${weakSecrets.join(", ")}`);
+      if (process.env.NODE_ENV === "production") {
+        throw new Error(`Secrets trop faibles: ${weakSecrets.join(", ")}`);
+      }
+
+      console.warn(
+        `Avertissement: secrets faibles en environnement local (${weakSecrets.join(", ")}). ` +
+          "Mettez a jour votre .env avant une mise en production."
+      );
     }
 
     await mongoose.connect(process.env.MONGO_URI);

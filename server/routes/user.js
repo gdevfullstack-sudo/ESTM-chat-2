@@ -154,10 +154,13 @@ router.get("/conversations", authMiddleware, async (req, res) => {
 
         return {
           user: user.toSafeObject(),
-          lastMessage: latestMessage.imageUrl
-            ? latestMessage.message || "Image envoyee"
-            : latestMessage.message,
+          lastMessage: latestMessage.videoUrl
+            ? latestMessage.message || "Video envoyee"
+            : latestMessage.imageUrl
+              ? latestMessage.message || "Photo envoyee"
+              : latestMessage.message,
           imageUrl: latestMessage.imageUrl,
+          videoUrl: latestMessage.videoUrl,
           lastMessageAt: latestMessage.createdAt,
           direction: String(latestMessage.senderId) === String(currentUserId) ? "out" : "in",
           unreadCount: conversation.unreadCount

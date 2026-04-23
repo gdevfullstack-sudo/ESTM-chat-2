@@ -9,7 +9,8 @@ const User = require("../models/User");
 
 const router = express.Router();
 const uploadDir = path.join(__dirname, "..", "..", "public", "uploads");
-const allowedExtensions = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp"]);
+const allowedImageExtensions = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp"]);
+const allowedVideoExtensions = new Set([".mp4", ".webm", ".mov", ".m4v"]);
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -28,12 +29,15 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: {
-    fileSize: Number(process.env.MAX_FILE_SIZE_MB || 5) * 1024 * 1024
+    fileSize: Number(process.env.MAX_FILE_SIZE_MB || 20) * 1024 * 1024
   },
   fileFilter(req, file, cb) {
     const extension = path.extname(file.originalname || "").toLowerCase();
-    if (!file.mimetype.startsWith("image/") || !allowedExtensions.has(extension)) {
-      return cb(new Error("Seules les images sont autorisees."));
+    const isImage = file.mimetype.startsWith("image/") && allowedImageExtensions.has(extension);
+    const isVideo = file.mimetype.startsWith("video/") && allowedVideoExtensions.has(extension);
+
+    if (!isImage && !isVideo) {
+      return cb(new Error("Seules les photos et videos sont autorisees."));
     }
 
     cb(null, true);
@@ -97,7 +101,7 @@ router.get("/:userId", authMiddleware, async (req, res) => {
 });
 
 router.post("/", authMiddleware, (req, res, next) => {
-  upload.single("image")(req, res, (error) => {
+  upload.single("media")(req, res, (error) => {
     if (error) {
       return res.status(400).json({ message: error.message || "Upload invalide." });
     }
@@ -108,9 +112,10 @@ router.post("/", authMiddleware, (req, res, next) => {
   try {
     const { receiverId, message } = req.body;
     const trimmedMessage = (message || "").trim();
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
+    const imageUrl = req.file && req.file.mimetype.startsWith("image/") ? `/uploads/${req.file.filename}` : "";
+    const videoUrl = req.file && req.file.mimetype.startsWith("video/") ? `/uploads/${req.file.filename}` : "";
 
-    if (!receiverId || (!trimmedMessage && !imageUrl)) {
+    if (!receiverId || (!trimmedMessage && !imageUrl && !videoUrl)) {
       return res.status(400).json({ message: "Destinataire et contenu obligatoires." });
     }
 
@@ -127,7 +132,8 @@ router.post("/", authMiddleware, (req, res, next) => {
       senderId: req.user._id,
       receiverId,
       message: trimmedMessage,
-      imageUrl
+      imageUrl,
+      videoUrl
     });
 
     return res.status(201).json({ message: createdMessage });

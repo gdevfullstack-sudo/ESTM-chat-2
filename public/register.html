@@ -7,62 +7,114 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body data-page="register">
-    <main class="auth-shell">
-      <section class="brand-panel">
-        <div class="brand-badge">ESTIM Chat</div>
-        <h1>Creez votre compte en quelques secondes.</h1>
-        <p>
-          Rejoignez vos contacts, retrouvez vos conversations et profitez d'un chat temps reel.
-        </p>
+    <main class="auth-shell auth-shell--register">
+      <section class="brand-panel brand-panel--register">
+        <div class="brand-badge brand-badge--register">ESTIM CHAT</div>
+        <div class="register-hero">
+          <h1>
+            The Midnight
+            <span>Conductor.</span>
+          </h1>
+          <p>
+            Orchestrer vos communications professionnelles dans un environnement editorial
+            pense pour la precision et la fluidite.
+          </p>
+        </div>
+        <div class="register-metrics" aria-label="Indicateurs de confiance">
+          <article class="register-metric">
+            <strong>99.9%</strong>
+            <span>Uptime reliability</span>
+          </article>
+          <article class="register-metric">
+            <strong>AES-256</strong>
+            <span>End-to-end encryption</span>
+          </article>
+        </div>
       </section>
 
-      <section class="auth-card">
-        <div class="auth-card__header">
-          <h2>Inscription</h2>
-          <p>Configurez votre compte de messagerie.</p>
+      <section class="auth-card auth-card--register">
+        <div class="auth-card__header auth-card__header--register">
+          <h2>Create your account</h2>
+          <p>Step into the conductor's circle.</p>
         </div>
 
-        <form id="register-form" class="auth-form">
-          <label>
-            <span>Nom utilisateur</span>
-            <input type="text" name="username" placeholder="Votre nom" required />
+        <form id="register-form" class="auth-form auth-form--register">
+          <label class="auth-field auth-field--icon">
+            <span>Full name</span>
+            <div class="input-shell">
+              <span class="input-icon" aria-hidden="true">◔</span>
+              <input type="text" name="username" placeholder="Julian Sterling" required />
+            </div>
           </label>
 
-          <label>
-            <span>Email</span>
-            <input type="email" name="email" placeholder="vous@estimchat.com" required />
+          <label class="auth-field auth-field--icon">
+            <span>Work email</span>
+            <div class="input-shell">
+              <span class="input-icon" aria-hidden="true">@</span>
+              <input type="email" name="email" placeholder="j.sterling@firm.com" required />
+            </div>
           </label>
 
-          <label>
-            <span>Mot de passe</span>
-            <input type="password" name="password" placeholder="Minimum 6 caracteres" required />
+          <label class="auth-field auth-field--icon">
+            <span>Security key</span>
+            <div class="input-shell input-shell--trailing">
+              <span class="input-icon" aria-hidden="true">•</span>
+              <input
+                type="password"
+                name="password"
+                placeholder="Minimum 6 characters"
+                required
+              />
+              <button class="ghost-toggle" type="button" aria-label="Afficher le mot de passe">
+                ○
+              </button>
+            </div>
           </label>
 
-          <label>
-            <span>Confirmation</span>
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirmez votre mot de passe"
-              required
-            />
+          <label class="auth-field auth-field--icon">
+            <span>Confirm key</span>
+            <div class="input-shell">
+              <span class="input-icon" aria-hidden="true">•</span>
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Repeat your security key"
+                required
+              />
+            </div>
           </label>
 
-          <button type="submit" class="btn btn-primary">Creer mon compte</button>
+          <label class="terms-check">
+            <input type="checkbox" name="terms" required />
+            <span>
+              J'accepte les <a href="#">Terms of Conduct</a> et le protocole de
+              confidentialite.
+            </span>
+          </label>
+
+          <button type="submit" class="btn btn-primary btn-primary--register">
+            Begin Journey
+          </button>
         </form>
 
-        <div class="separator"><span>ou s'inscrire avec</span></div>
-
-        <div class="oauth-grid">
-          <a class="btn btn-secondary" href="/api/auth/google">Google</a>
-          <a class="btn btn-secondary" href="/api/auth/apple">Apple</a>
+        <div class="separator separator--register">
+          <span>Already part of the network? <a href="login.html">Sign In</a></span>
         </div>
 
-        <p class="switch-link">
-          Vous avez deja un compte ? <a href="login.html">Se connecter</a>
-        </p>
+        <div class="oauth-grid oauth-grid--register">
+          <a class="btn btn-secondary oauth-btn" href="/api/auth/google" aria-label="Continuer avec Google">
+            Google
+          </a>
+          <a class="btn btn-secondary oauth-btn" href="/api/auth/apple" aria-label="Continuer avec Apple">
+            Apple
+          </a>
+          <button class="btn btn-secondary oauth-btn" type="button" aria-label="Authentification biométrique">
+            ID
+          </button>
+        </div>
 
         <p id="auth-message" class="message-box" aria-live="polite"></p>
+        <p class="register-footer">© 2024 ESTIM GLOBAL COMMUNICATIONS GROUP. ALL RIGHTS RESERVED.</p>
       </section>
     </main>
 

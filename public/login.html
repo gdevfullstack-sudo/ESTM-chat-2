@@ -7,52 +7,76 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body data-page="login">
-    <main class="auth-shell">
-      <section class="brand-panel">
-        <div class="brand-badge">ESTIM Chat</div>
-        <h1>Discutez en temps reel, en toute simplicite.</h1>
-        <p>
-          Une messagerie moderne, securisee et rapide, pensee pour mobile et desktop.
-        </p>
-        <div class="brand-preview">
-          <div class="mini-card online">Messages instantanes</div>
-          <div class="mini-card">Utilisateurs en ligne</div>
-          <div class="mini-card accent">Interface fluide</div>
+    <main class="auth-shell auth-shell--login">
+      <section class="brand-panel brand-panel--login">
+        <div class="login-visual">
+          <div class="brand-badge brand-badge--login">ESTIM CHAT</div>
+          <div class="login-visual__content">
+            <h1>The Midnight Conductor.</h1>
+            <p>
+              Experience the rhythm of high-end messaging. Where every interaction is
+              orchestrated with surgical precision and professional authority.
+            </p>
+          </div>
+
+          <div class="login-community">
+            <div class="login-community__avatars" aria-hidden="true">
+              <span>A</span>
+              <span>M</span>
+              <span>K</span>
+            </div>
+            <p>Joined by 2,000+ conductors worldwide</p>
+          </div>
         </div>
       </section>
 
-      <section class="auth-card">
-        <div class="auth-card__header">
-          <h2>Connexion</h2>
-          <p>Accedez a votre espace de discussion.</p>
+      <section class="auth-card auth-card--login">
+        <div class="auth-card__header auth-card__header--login">
+          <h2>Welcome Back</h2>
+          <p>Please enter your credentials to continue.</p>
         </div>
 
-        <form id="login-form" class="auth-form">
-          <label>
-            <span>Email</span>
-            <input type="email" name="email" placeholder="vous@estimchat.com" required />
+        <div class="oauth-grid oauth-grid--login">
+          <a class="btn btn-secondary oauth-btn oauth-btn--login" href="/api/auth/google">Google</a>
+          <a class="btn btn-secondary oauth-btn oauth-btn--login" href="/api/auth/apple">Apple</a>
+        </div>
+
+        <div class="separator separator--login"><span>Or email login</span></div>
+
+        <form id="login-form" class="auth-form auth-form--login">
+          <label class="auth-field auth-field--icon">
+            <div class="auth-field__row">
+              <span>Work email</span>
+            </div>
+            <div class="input-shell">
+              <span class="input-icon" aria-hidden="true">@</span>
+              <input type="email" name="email" placeholder="name@company.com" required />
+            </div>
           </label>
 
-          <label>
-            <span>Mot de passe</span>
-            <input type="password" name="password" placeholder="Votre mot de passe" required />
+          <label class="auth-field auth-field--icon">
+            <div class="auth-field__row">
+              <span>Password</span>
+              <a class="inline-link" href="#">Forgot?</a>
+            </div>
+            <div class="input-shell input-shell--trailing">
+              <span class="input-icon" aria-hidden="true">•</span>
+              <input type="password" name="password" placeholder="••••••••" required />
+              <button class="ghost-toggle" type="button" aria-label="Afficher le mot de passe">
+                ○
+              </button>
+            </div>
           </label>
 
-          <button type="submit" class="btn btn-primary">Se connecter</button>
+          <button type="submit" class="btn btn-primary btn-primary--login">Sign In</button>
         </form>
 
-        <div class="separator"><span>ou continuer avec</span></div>
-
-        <div class="oauth-grid">
-          <a class="btn btn-secondary" href="/api/auth/google">Google</a>
-          <a class="btn btn-secondary" href="/api/auth/apple">Apple</a>
-        </div>
-
-        <p class="switch-link">
-          Pas encore de compte ? <a href="register.html">Creer un compte</a>
+        <p class="switch-link switch-link--login">
+          Don't have an account? <a href="register.html">Start Conducting</a>
         </p>
 
         <p id="auth-message" class="message-box" aria-live="polite"></p>
+        <p class="login-footer">Secure end-to-end encrypted access</p>
       </section>
     </main>
 

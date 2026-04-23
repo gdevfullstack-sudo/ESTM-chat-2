@@ -93,11 +93,11 @@ function getResponseMessage(response, data, fallbackMessage) {
   }
 
   if (response.status === 404) {
-    return "API introuvable. Verifie que le serveur Express tourne bien sur ce localhost.";
+    return "API introuvable. Ouvre l'application via le serveur Express sur http://localhost:5000.";
   }
 
   if (response.status >= 500) {
-    return fallbackMessage || "Erreur serveur. Regarde aussi la console du backend.";
+    return fallbackMessage || `Erreur serveur (${response.status}). Regarde aussi la console du backend.`;
   }
 
   if (!response.ok) {
@@ -263,7 +263,13 @@ async function initLogin() {
       saveAuth(data);
       window.location.href = "inbox.html";
     } catch (error) {
-      showMessage("auth-message", error.message, "error");
+      showMessage(
+        "auth-message",
+        error.message === "Failed to fetch"
+          ? "Impossible de joindre l'API. Verifie que le serveur Express tourne sur http://localhost:5000."
+          : error.message,
+        "error"
+      );
     }
   });
 }
@@ -300,7 +306,13 @@ async function initRegister() {
       saveAuth(data);
       window.location.href = "inbox.html";
     } catch (error) {
-      showMessage("auth-message", error.message, "error");
+      showMessage(
+        "auth-message",
+        error.message === "Failed to fetch"
+          ? "Impossible de joindre l'API. Verifie que le serveur Express tourne sur http://localhost:5000."
+          : error.message,
+        "error"
+      );
     }
   });
 }
@@ -350,6 +362,18 @@ function contactItemTemplate(user, subtitle = "") {
   });
 
   return item;
+}
+
+function getMessagePreviewLabel(message) {
+  if (message.videoUrl) {
+    return message.message || "Video envoyee";
+  }
+
+  if (message.imageUrl) {
+    return message.message || "Photo envoyee";
+  }
+
+  return message.message || "";
 }
 
 async function loadInbox(search = "") {
@@ -463,6 +487,12 @@ function appendMessage(message) {
     row.dataset.messageId = message._id;
   }
 
+  if (String(message.senderId) !== String(currentUserId) && state.currentChatUser) {
+    const avatar = createAvatar(state.currentChatUser);
+    avatar.classList.add("message-avatar");
+    row.appendChild(avatar);
+  }
+
   const bubble = document.createElement("div");
   bubble.className = "message-bubble";
 
@@ -481,6 +511,15 @@ function appendMessage(message) {
     image.src = message.imageUrl;
     image.alt = "Image envoyee";
     bubble.appendChild(image);
+  }
+
+  if (message.videoUrl) {
+    const video = document.createElement("video");
+    video.className = "message-video";
+    video.src = message.videoUrl;
+    video.controls = true;
+    video.preload = "metadata";
+    bubble.appendChild(video);
   }
 
   const isOutgoing = String(message.senderId) === String(currentUserId);
@@ -529,7 +568,7 @@ async function initChat() {
 
   const form = document.getElementById("message-form");
   const input = document.getElementById("message-input");
-  const imageInput = document.getElementById("message-image");
+  const mediaInput = document.getElementById("message-media");
 
   input.addEventListener("input", () => {
     state.socket.emit("typing:start", { receiverId: userId });
@@ -542,17 +581,17 @@ async function initChat() {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const value = input.value.trim();
-    const imageFile = imageInput.files[0];
+    const mediaFile = mediaInput.files[0];
 
-    if (!value && !imageFile) return;
+    if (!value && !mediaFile) return;
 
     const formData = new FormData();
     formData.append("receiverId", userId);
     if (value) {
       formData.append("message", value);
     }
-    if (imageFile) {
-      formData.append("image", imageFile);
+    if (mediaFile) {
+      formData.append("media", mediaFile);
     }
 
     try {
@@ -579,6 +618,7 @@ async function initChat() {
           receiverId: userId,
           message: sendData.message.message,
           imageUrl: sendData.message.imageUrl,
+          videoUrl: sendData.message.videoUrl,
           messageId: sendData.message._id,
           createdAt: sendData.message.createdAt
         });
@@ -590,7 +630,7 @@ async function initChat() {
 
     showMessage("typing-indicator", "", "");
     input.value = "";
-    imageInput.value = "";
+    mediaInput.value = "";
     state.socket.emit("typing:stop", { receiverId: userId });
   });
 }
@@ -602,10 +642,11 @@ function renderChatUser(user) {
   card.innerHTML = "";
 
   const headerMeta = document.createElement("div");
+  headerMeta.className = "chat-header__identity";
   const headerName = document.createElement("strong");
   headerName.textContent = user.username;
   const headerEmail = document.createElement("div");
-  headerEmail.textContent = user.email;
+  headerEmail.textContent = "Verified identity · Secure channel";
   headerMeta.append(headerName, headerEmail);
 
   header.append(createAvatar(user), headerMeta);
