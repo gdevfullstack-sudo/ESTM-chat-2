@@ -166,6 +166,7 @@ router.get("/status", (req, res) => {
 
 router.post("/register", async (req, res) => {
   try {
+    console.log("Tentative d'inscription:", req.body.email);
     const { username, email, password, confirmPassword } = req.body;
 
     if (!username || !email || !password || !confirmPassword) {
@@ -189,6 +190,7 @@ router.post("/register", async (req, res) => {
     }
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
+    console.log("Vérification utilisateur existant:", existingUser ? "trouvé" : "pas trouvé");
     if (existingUser) {
       return res.status(409).json({ message: "Cet email est deja utilise." });
     }
