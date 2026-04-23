@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ESTIM Chat | Profil du contact</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-page="contact-profile">
+    <main class="contact-profile-shell">
+      <aside class="sidebar sidebar--nav contact-profile-sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-badge brand-badge--sidebar">ESTIM CHAT</div>
+          <p>Profil du contact</p>
+        </div>
+
+        <a id="contact-profile-back" class="back-link back-link--chat" href="inbox.html">Retour a la discussion</a>
+
+        <section id="contact-profile-summary" class="contact-profile-summary"></section>
+
+        <div class="panel-block contact-profile-facts">
+          <div class="panel-block__title">Apercu</div>
+          <div id="contact-profile-facts" class="contact-profile-facts__grid"></div>
+        </div>
+
+        <div class="sidebar-spacer"></div>
+        <div id="contact-profile-sidebar-user" class="sidebar-profile sidebar-profile--chat"></div>
+      </aside>
+
+      <section class="contact-profile-main">
+        <header class="contact-profile-header">
+          <div>
+            <h1 id="contact-profile-title">Profil</h1>
+            <p>Retrouvez les informations du contact et les medias partages entre vous.</p>
+          </div>
+        </header>
+
+        <section class="contact-profile-section">
+          <div class="panel-block__title">Medias envoyes</div>
+          <div id="shared-media-grid" class="shared-media-grid"></div>
+          <div id="shared-media-empty" class="empty-state__card contact-profile-empty" hidden>
+            Aucun media partage dans cette conversation pour le moment.
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

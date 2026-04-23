@@ -11,15 +11,19 @@
       <aside class="sidebar sidebar--nav sidebar--chat">
         <div class="sidebar-brand">
           <div class="brand-badge brand-badge--sidebar">ESTIM CHAT</div>
-          <p>Messagerie premium</p>
+          <p>Discussion</p>
         </div>
 
         <a class="back-link back-link--chat" href="inbox.html">Retour a la boite</a>
         <div id="chat-contact-card" class="chat-contact-card chat-contact-card--secure"></div>
+        <a id="chat-profile-link" class="back-link back-link--chat back-link--profile" href="inbox.html">
+          Voir le profil
+        </a>
         <div class="chat-sidebar-note">
-          Cette conversation autorise le texte, les photos et les videos. Aucun appel
-          vocal, appel video ou message vocal n'est disponible.
+          Conversation texte, photo et video uniquement.
         </div>
+        <div class="sidebar-spacer"></div>
+        <div id="chat-sidebar-profile" class="sidebar-profile sidebar-profile--chat"></div>
       </aside>
 
       <section class="chat-panel chat-panel--secure">
@@ -27,29 +31,26 @@
           <div id="chat-header-user" class="chat-header__user chat-header__user--secure"></div>
           <div class="chat-header__meta">
             <div id="typing-indicator" class="typing-indicator"></div>
-            <button class="chat-header__menu" type="button" aria-label="Options de conversation">
-              Options
-            </button>
+            <button class="chat-header__menu" type="button" aria-label="Options de conversation">⋮</button>
           </div>
         </header>
 
-        <div class="chat-day-separator">Aujourd'hui</div>
         <div id="message-list" class="message-list message-list--secure"></div>
 
         <form id="message-form" class="message-form message-form--secure">
           <label class="file-button file-button--secure" title="Envoyer une photo ou une video">
             <input id="message-media" type="file" accept="image/*,video/*" />
-            <span>Photo / video</span>
+            <span>+</span>
           </label>
           <div class="message-compose">
             <textarea
               id="message-input"
               rows="1"
-              placeholder="Ecrivez votre message..."
+              placeholder="Write messages..."
               maxlength="2000"
             ></textarea>
           </div>
-          <button type="submit" class="btn btn-primary btn-primary--send">Envoyer</button>
+          <button type="submit" class="btn btn-primary btn-primary--send" aria-label="Envoyer">➤</button>
         </form>
         <p class="chat-footer-note">Session chiffree de bout en bout</p>
       </section>

@@ -128,6 +128,29 @@ function normalizeAvatar(user) {
   );
 }
 
+function renderSidebarProfile(elementId, user, label = "Mon profil") {
+  const container = document.getElementById(elementId);
+  if (!container || !user) return;
+
+  container.innerHTML = "";
+
+  const profileAvatar = document.createElement("div");
+  profileAvatar.className = "sidebar-profile__avatar";
+  profileAvatar.textContent = user.username?.slice(0, 1).toUpperCase() || "?";
+
+  const profileMeta = document.createElement("div");
+  profileMeta.className = "sidebar-profile__meta";
+
+  const profileName = document.createElement("strong");
+  profileName.textContent = user.username;
+
+  const profileLabel = document.createElement("span");
+  profileLabel.textContent = label;
+
+  profileMeta.append(profileName, profileLabel);
+  container.append(profileAvatar, profileMeta);
+}
+
 function formatTime(value) {
   return new Date(value).toLocaleTimeString("fr-FR", {
     hour: "2-digit",
@@ -639,8 +662,16 @@ async function initChat() {
 function renderChatUser(user) {
   const header = document.getElementById("chat-header-user");
   const card = document.getElementById("chat-contact-card");
+  const sidebarProfile = document.getElementById("chat-sidebar-profile");
+  const profileLink = document.getElementById("chat-profile-link");
   header.innerHTML = "";
   card.innerHTML = "";
+  if (sidebarProfile) {
+    sidebarProfile.innerHTML = "";
+  }
+  if (profileLink) {
+    profileLink.href = `contact-profile.html?user=${user._id}`;
+  }
 
   const headerMeta = document.createElement("div");
   headerMeta.className = "chat-header__identity";
@@ -660,6 +691,151 @@ function renderChatUser(user) {
   cardMeta.append(cardName, cardStatus);
 
   card.append(createAvatar(user), cardMeta);
+
+  renderSidebarProfile("chat-sidebar-profile", state.auth?.user, "Mon profil");
+}
+
+function renderSharedMedia(messages) {
+  const grid = document.getElementById("shared-media-grid");
+  const empty = document.getElementById("shared-media-empty");
+  if (!grid || !empty) return;
+
+  grid.innerHTML = "";
+
+  const mediaMessages = messages.filter((message) => message.imageUrl || message.videoUrl);
+  if (!mediaMessages.length) {
+    empty.hidden = false;
+    return;
+  }
+
+  empty.hidden = true;
+
+  mediaMessages
+    .slice()
+    .reverse()
+    .forEach((message) => {
+      const item = document.createElement("article");
+      item.className = "shared-media-item";
+
+      if (message.imageUrl) {
+        const image = document.createElement("img");
+        image.className = "shared-media-item__preview";
+        image.src = message.imageUrl;
+        image.alt = "Image partagee";
+        item.appendChild(image);
+      }
+
+      if (message.videoUrl) {
+        const video = document.createElement("video");
+        video.className = "shared-media-item__preview";
+        video.src = message.videoUrl;
+        video.controls = true;
+        video.preload = "metadata";
+        item.appendChild(video);
+      }
+
+      const meta = document.createElement("div");
+      meta.className = "shared-media-item__meta";
+
+      const title = document.createElement("strong");
+      title.textContent = message.message || (message.videoUrl ? "Video partagee" : "Image partagee");
+
+      const time = document.createElement("span");
+      time.textContent = formatDateTime(message.createdAt);
+
+      meta.append(title, time);
+      item.appendChild(meta);
+      grid.appendChild(item);
+    });
+}
+
+function renderContactProfile(user, messages) {
+  const summary = document.getElementById("contact-profile-summary");
+  const title = document.getElementById("contact-profile-title");
+  const facts = document.getElementById("contact-profile-facts");
+  const backLink = document.getElementById("contact-profile-back");
+
+  if (!summary || !title || !facts) return;
+
+  title.textContent = user.username;
+  if (backLink) {
+    backLink.href = `chat.html?user=${user._id}`;
+  }
+
+  summary.innerHTML = "";
+  facts.innerHTML = "";
+
+  const avatar = createAvatar(user);
+  avatar.classList.add("contact-profile-summary__avatar");
+
+  const meta = document.createElement("div");
+  meta.className = "contact-profile-summary__meta";
+
+  const name = document.createElement("h2");
+  name.textContent = user.username;
+
+  const email = document.createElement("p");
+  email.textContent = user.email || "Email non disponible";
+
+  const status = document.createElement("span");
+  status.className = `contact-profile-summary__status ${user.isOnline ? "is-online" : ""}`;
+  status.textContent = user.isOnline ? "En ligne" : "Hors ligne";
+
+  meta.append(name, email, status);
+  summary.append(avatar, meta);
+
+  const photosCount = messages.filter((message) => message.imageUrl).length;
+  const videosCount = messages.filter((message) => message.videoUrl).length;
+  const totalCount = messages.length;
+
+  [
+    { label: "Messages", value: String(totalCount) },
+    { label: "Photos", value: String(photosCount) },
+    { label: "Videos", value: String(videosCount) }
+  ].forEach((fact) => {
+    const card = document.createElement("div");
+    card.className = "contact-profile-facts__item";
+
+    const value = document.createElement("strong");
+    value.textContent = fact.value;
+
+    const label = document.createElement("span");
+    label.textContent = fact.label;
+
+    card.append(value, label);
+    facts.appendChild(card);
+  });
+}
+
+async function initContactProfile() {
+  if (!requireAuth()) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get("user");
+
+  if (!userId) {
+    window.location.href = "inbox.html";
+    return;
+  }
+
+  const [userResponse, messagesResponse] = await Promise.all([
+    api(`/users/${userId}`),
+    api(`/messages/${userId}`)
+  ]);
+
+  const [userData, messagesData] = await Promise.all([
+    readResponseData(userResponse),
+    readResponseData(messagesResponse)
+  ]);
+
+  if (!userResponse.ok || !messagesResponse.ok || !userData?.user || !messagesData?.recipient) {
+    window.location.href = `chat.html?user=${userId}`;
+    return;
+  }
+
+  renderContactProfile(userData.user, messagesData.messages || []);
+  renderSharedMedia(messagesData.messages || []);
+  renderSidebarProfile("contact-profile-sidebar-user", state.auth?.user, "Mon profil");
 }
 
 async function initProfile() {
@@ -791,6 +967,7 @@ async function bootstrap() {
   if (page === "inbox") await initInbox();
   if (page === "chat") await initChat();
   if (page === "profile") await initProfile();
+  if (page === "contact-profile") await initContactProfile();
 }
 
 bootstrap();
