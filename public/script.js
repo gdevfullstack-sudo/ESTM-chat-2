@@ -809,7 +809,7 @@ async function initProfile() {
 
     const statusDot = document.getElementById("profile-status-dot");
     if (statusDot) {
-      statusDot.className = `absolute bottom-1 right-1 w-6 h-6 border-2 border-white rounded-full ${user.isOnline ? 'bg-green-500' : 'bg-gray-400'}`;
+      statusDot.className = `status-dot ${user.isOnline ? 'online' : ''}`;
     }
 
     const statusBadge = document.getElementById("profile-status-badge");
@@ -837,25 +837,30 @@ async function initProfile() {
 
     const shareLinkBtn = document.getElementById("profile-share-link");
     if (shareLinkBtn) {
-      shareLinkBtn.addEventListener("click", () => {
-        const link = `${window.location.origin}/chat.html?user=${user._id}`;
-        navigator.clipboard.writeText(link).then(() => {
-          const msg = document.getElementById("profile-message");
-          if (msg) {
-            msg.textContent = "Lien copié dans le presse-papier !";
-            msg.className = "message-box is-success mt-6";
-            setTimeout(() => {
-              msg.textContent = "";
-              msg.className = "message-box mt-6";
-            }, 3000);
-          }
+      if (isOwnProfile) {
+        shareLinkBtn.classList.add("hidden");
+      } else {
+        shareLinkBtn.classList.remove("hidden");
+        shareLinkBtn.addEventListener("click", () => {
+          const link = `${window.location.origin}/chat.html?user=${user._id}`;
+          navigator.clipboard.writeText(link).then(() => {
+            const msg = document.getElementById("profile-message");
+            if (msg) {
+              msg.textContent = "Lien copié dans le presse-papier !";
+              msg.className = "message-box is-success mt-6";
+              setTimeout(() => {
+                msg.textContent = "";
+                msg.className = "message-box mt-6";
+              }, 3000);
+            }
+          });
         });
-      });
+      }
     }
 
     const topAvatar = document.getElementById("current-user-avatar-top");
-    if (topAvatar && isOwnProfile) {
-      topAvatar.src = normalizeAvatar(user);
+    if (topAvatar) {
+      topAvatar.src = normalizeAvatar(state.auth.user);
     }
 
     if (isOwnProfile) {

@@ -261,28 +261,33 @@ Envoyer un message
 <button type="button" id="logout-button" class="flex-1 py-3 bg-surface-container text-on-surface font-bold rounded-full hover:bg-surface-container-high transition-colors active:scale-95">Déconnexion</button>
 </div>
 </form>
+</div>
+</div>
+
 <p id="profile-message" class="message-box mt-6" aria-live="polite"></p>
-</div>
-</div>
 
 <!-- Read-only Info Section -->
 <div id="profile-readonly-section" class="hidden">
 <div class="bg-white p-8 rounded-xl border border-zinc-100 shadow-sm mb-8">
 <h3 class="font-headline-lg text-on-surface mb-6">À propos</h3>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<div class="p-4 bg-surface-container-low rounded-lg">
-<p class="text-label-sm text-secondary uppercase tracking-wider mb-1">Membre depuis</p>
-<p id="profile-created-at" class="font-headline-md text-on-surface">...</p>
-</div>
-<div class="p-4 bg-surface-container-low rounded-lg">
-<p class="text-label-sm text-secondary uppercase tracking-wider mb-1">Statut</p>
-<p id="profile-online-status" class="font-headline-md text-on-surface">...</p>
-</div>
-<div class="p-4 bg-surface-container-low rounded-lg">
-<p class="text-label-sm text-secondary uppercase tracking-wider mb-1">Type de compte</p>
-<p id="profile-provider" class="font-headline-md text-on-surface">...</p>
-</div>
-</div>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="p-4 bg-surface-container-low rounded-lg">
+                  <p class="text-label-sm text-secondary uppercase tracking-wider mb-1">Membre depuis</p>
+                  <p id="profile-created-at" class="font-headline-md text-on-surface">...</p>
+                </div>
+                <div class="p-4 bg-surface-container-low rounded-lg">
+                  <p class="text-label-sm text-secondary uppercase tracking-wider mb-1">Statut</p>
+                  <p id="profile-online-status" class="font-headline-md text-on-surface">...</p>
+                </div>
+                <div class="p-4 bg-surface-container-low rounded-lg">
+                  <p class="text-label-sm text-secondary uppercase tracking-wider mb-1">Type de compte</p>
+                  <p id="profile-provider" class="font-headline-md text-on-surface">...</p>
+                </div>
+                <div class="p-4 bg-surface-container-low rounded-lg">
+                  <p class="text-label-sm text-secondary uppercase tracking-wider mb-1">ID Étudiant</p>
+                  <p id="profile-student-id" class="font-headline-md text-on-surface">...</p>
+                </div>
+              </div>
 </div>
 </div>
 </main>
