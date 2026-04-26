@@ -1,5 +1,10 @@
 const mongoose = require("mongoose");
 
+function generateStudentId() {
+  const randomNum = Math.floor(100 + Math.random() * 900);
+  return `ES${randomNum}`;
+}
+
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -32,12 +37,32 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["local", "google", "apple"],
       default: "local"
+    },
+    studentId: {
+      type: String,
+      unique: true,
+      sparse: true
     }
   },
   {
     timestamps: { createdAt: true, updatedAt: true }
   }
 );
+
+userSchema.pre("save", async function(next) {
+  if (!this.studentId) {
+    let unique = false;
+    while (!unique) {
+      const candidate = generateStudentId();
+      const existing = await mongoose.model("User").findOne({ studentId: candidate });
+      if (!existing) {
+        this.studentId = candidate;
+        unique = true;
+      }
+    }
+  }
+  next();
+});
 
 userSchema.methods.toSafeObject = function toSafeObject() {
   return {
@@ -47,7 +72,8 @@ userSchema.methods.toSafeObject = function toSafeObject() {
     avatar: this.avatar,
     isOnline: this.isOnline,
     createdAt: this.createdAt,
-    provider: this.provider
+    provider: this.provider,
+    studentId: this.studentId
   };
 };
 

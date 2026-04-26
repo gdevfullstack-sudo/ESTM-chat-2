@@ -128,29 +128,6 @@ function normalizeAvatar(user) {
   );
 }
 
-function renderSidebarProfile(elementId, user, label = "Mon profil") {
-  const container = document.getElementById(elementId);
-  if (!container || !user) return;
-
-  container.innerHTML = "";
-
-  const profileAvatar = document.createElement("div");
-  profileAvatar.className = "sidebar-profile__avatar";
-  profileAvatar.textContent = user.username?.slice(0, 1).toUpperCase() || "?";
-
-  const profileMeta = document.createElement("div");
-  profileMeta.className = "sidebar-profile__meta";
-
-  const profileName = document.createElement("strong");
-  profileName.textContent = user.username;
-
-  const profileLabel = document.createElement("span");
-  profileLabel.textContent = label;
-
-  profileMeta.append(profileName, profileLabel);
-  container.append(profileAvatar, profileMeta);
-}
-
 function formatTime(value) {
   return new Date(value).toLocaleTimeString("fr-FR", {
     hour: "2-digit",
@@ -299,7 +276,6 @@ async function initLogin() {
 
 async function initRegister() {
   redirectIfAuthenticated();
-  handleOAuthPayload();
 
   document.getElementById("register-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -662,23 +638,15 @@ async function initChat() {
 function renderChatUser(user) {
   const header = document.getElementById("chat-header-user");
   const card = document.getElementById("chat-contact-card");
-  const sidebarProfile = document.getElementById("chat-sidebar-profile");
-  const profileLink = document.getElementById("chat-profile-link");
   header.innerHTML = "";
   card.innerHTML = "";
-  if (sidebarProfile) {
-    sidebarProfile.innerHTML = "";
-  }
-  if (profileLink) {
-    profileLink.href = `contact-profile.html?user=${user._id}`;
-  }
 
   const headerMeta = document.createElement("div");
   headerMeta.className = "chat-header__identity";
   const headerName = document.createElement("strong");
   headerName.textContent = user.username;
   const headerEmail = document.createElement("div");
-  headerEmail.textContent = "Identite verifiee · canal securise";
+  headerEmail.textContent = "Identite verifiee - canal securise";
   headerMeta.append(headerName, headerEmail);
 
   header.append(createAvatar(user), headerMeta);
@@ -691,258 +659,181 @@ function renderChatUser(user) {
   cardMeta.append(cardName, cardStatus);
 
   card.append(createAvatar(user), cardMeta);
-
-  renderSidebarProfile("chat-sidebar-profile", state.auth?.user, "Mon profil");
-}
-
-function renderSharedMedia(messages) {
-  const grid = document.getElementById("shared-media-grid");
-  const empty = document.getElementById("shared-media-empty");
-  if (!grid || !empty) return;
-
-  grid.innerHTML = "";
-
-  const mediaMessages = messages.filter((message) => message.imageUrl || message.videoUrl);
-  if (!mediaMessages.length) {
-    empty.hidden = false;
-    return;
-  }
-
-  empty.hidden = true;
-
-  mediaMessages
-    .slice()
-    .reverse()
-    .forEach((message) => {
-      const item = document.createElement("article");
-      item.className = "shared-media-item";
-
-      if (message.imageUrl) {
-        const image = document.createElement("img");
-        image.className = "shared-media-item__preview";
-        image.src = message.imageUrl;
-        image.alt = "Image partagee";
-        item.appendChild(image);
-      }
-
-      if (message.videoUrl) {
-        const video = document.createElement("video");
-        video.className = "shared-media-item__preview";
-        video.src = message.videoUrl;
-        video.controls = true;
-        video.preload = "metadata";
-        item.appendChild(video);
-      }
-
-      const meta = document.createElement("div");
-      meta.className = "shared-media-item__meta";
-
-      const title = document.createElement("strong");
-      title.textContent = message.message || (message.videoUrl ? "Video partagee" : "Image partagee");
-
-      const time = document.createElement("span");
-      time.textContent = formatDateTime(message.createdAt);
-
-      meta.append(title, time);
-      item.appendChild(meta);
-      grid.appendChild(item);
-    });
-}
-
-function renderContactProfile(user, messages) {
-  const summary = document.getElementById("contact-profile-summary");
-  const title = document.getElementById("contact-profile-title");
-  const facts = document.getElementById("contact-profile-facts");
-  const backLink = document.getElementById("contact-profile-back");
-
-  if (!summary || !title || !facts) return;
-
-  title.textContent = user.username;
-  if (backLink) {
-    backLink.href = `chat.html?user=${user._id}`;
-  }
-
-  summary.innerHTML = "";
-  facts.innerHTML = "";
-
-  const avatar = createAvatar(user);
-  avatar.classList.add("contact-profile-summary__avatar");
-
-  const meta = document.createElement("div");
-  meta.className = "contact-profile-summary__meta";
-
-  const name = document.createElement("h2");
-  name.textContent = user.username;
-
-  const email = document.createElement("p");
-  email.textContent = user.email || "Email non disponible";
-
-  const status = document.createElement("span");
-  status.className = `contact-profile-summary__status ${user.isOnline ? "is-online" : ""}`;
-  status.textContent = user.isOnline ? "En ligne" : "Hors ligne";
-
-  meta.append(name, email, status);
-  summary.append(avatar, meta);
-
-  const photosCount = messages.filter((message) => message.imageUrl).length;
-  const videosCount = messages.filter((message) => message.videoUrl).length;
-  const totalCount = messages.length;
-
-  [
-    { label: "Messages", value: String(totalCount) },
-    { label: "Photos", value: String(photosCount) },
-    { label: "Videos", value: String(videosCount) }
-  ].forEach((fact) => {
-    const card = document.createElement("div");
-    card.className = "contact-profile-facts__item";
-
-    const value = document.createElement("strong");
-    value.textContent = fact.value;
-
-    const label = document.createElement("span");
-    label.textContent = fact.label;
-
-    card.append(value, label);
-    facts.appendChild(card);
-  });
-}
-
-async function initContactProfile() {
-  if (!requireAuth()) return;
-
-  const params = new URLSearchParams(window.location.search);
-  const userId = params.get("user");
-
-  if (!userId) {
-    window.location.href = "inbox.html";
-    return;
-  }
-
-  const [userResponse, messagesResponse] = await Promise.all([
-    api(`/users/${userId}`),
-    api(`/messages/${userId}`)
-  ]);
-
-  const [userData, messagesData] = await Promise.all([
-    readResponseData(userResponse),
-    readResponseData(messagesResponse)
-  ]);
-
-  if (!userResponse.ok || !messagesResponse.ok || !userData?.user || !messagesData?.recipient) {
-    window.location.href = `chat.html?user=${userId}`;
-    return;
-  }
-
-  renderContactProfile(userData.user, messagesData.messages || []);
-  renderSharedMedia(messagesData.messages || []);
-  renderSidebarProfile("contact-profile-sidebar-user", state.auth?.user, "Mon profil");
 }
 
 async function initProfile() {
   if (!requireAuth()) return;
 
-  const response = await api("/users/me");
-  const data = await readResponseData(response);
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get("user");
+  const isOwnProfile = !userId || String(userId) === String(state.auth.user._id);
 
-  if (!response.ok) {
-    clearAuth();
-    window.location.href = "login.html";
-    return;
+  try {
+    let user;
+    if (isOwnProfile) {
+      const response = await api("/users/me");
+      const data = await readResponseData(response);
+      if (!response.ok) {
+        clearAuth();
+        window.location.href = "login.html";
+        return;
+      }
+      user = data.user;
+    } else {
+      const response = await api(`/users/${userId}`);
+      const data = await readResponseData(response);
+      if (!response.ok) {
+        window.location.href = "inbox.html";
+        return;
+      }
+      user = data.user;
+    }
+
+    document.getElementById("profile-username-display").textContent = user.username;
+    document.getElementById("profile-email-display").textContent = user.email;
+    document.getElementById("profile-avatar-display").src = normalizeAvatar(user);
+    document.getElementById("profile-avatar-display").alt = user.username;
+
+    const statusDot = document.getElementById("profile-status-dot");
+    if (statusDot) {
+      statusDot.className = `absolute bottom-1 right-1 w-6 h-6 border-2 border-white rounded-full ${user.isOnline ? 'bg-green-500' : 'bg-gray-400'}`;
+    }
+
+    const statusBadge = document.getElementById("profile-status-badge");
+    if (statusBadge) {
+      statusBadge.textContent = user.isOnline ? "En ligne" : "Hors ligne";
+    }
+
+    const infoText = document.getElementById("profile-info-text");
+    if (infoText) {
+      infoText.textContent = isOwnProfile 
+        ? "Ceci est votre profil. Vous pouvez modifier vos informations ci-dessous."
+        : `Profil de ${user.username}. Vous pouvez lui envoyer un message.`;
+    }
+
+    const chatLink = document.getElementById("profile-chat-link");
+    if (chatLink) {
+      if (isOwnProfile) {
+        chatLink.href = "inbox.html";
+        chatLink.innerHTML = '<span class="material-symbols-outlined text-sm">chat</span>Voir mes messages';
+      } else {
+        chatLink.href = `chat.html?user=${user._id}`;
+        chatLink.innerHTML = '<span class="material-symbols-outlined text-sm">chat</span>Envoyer un message';
+      }
+    }
+
+    const topAvatar = document.getElementById("current-user-avatar-top");
+    if (topAvatar && isOwnProfile) {
+      topAvatar.src = normalizeAvatar(user);
+    }
+
+    if (isOwnProfile) {
+      const editSection = document.getElementById("profile-edit-section");
+      if (editSection) editSection.classList.remove("hidden");
+
+      document.getElementById("profile-username").value = user.username;
+      document.getElementById("profile-email").value = user.email;
+      document.getElementById("profile-avatar").value = user.avatar || "";
+
+      document.getElementById("profile-form")?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        try {
+          const saveResponse = await api("/users/me", {
+            method: "PUT",
+            body: JSON.stringify({
+              username: document.getElementById("profile-username").value,
+              avatar: document.getElementById("profile-avatar").value
+            })
+          });
+
+          const saveData = await readResponseData(saveResponse);
+          if (!saveResponse.ok) {
+            throw new Error(getResponseMessage(saveResponse, saveData, "Mise a jour du profil impossible."));
+          }
+
+          saveAuth({
+            ...state.auth,
+            user: saveData.user
+          });
+          showMessage("profile-message", saveData.message, "success");
+          document.getElementById("profile-username-display").textContent = saveData.user.username;
+          document.getElementById("profile-avatar-display").src = normalizeAvatar(saveData.user);
+          if (topAvatar) topAvatar.src = normalizeAvatar(saveData.user);
+        } catch (error) {
+          showMessage("profile-message", error.message, "error");
+        }
+      });
+
+      document.getElementById("profile-avatar-file")?.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("avatar", file);
+
+        try {
+          const uploadResponse = await fetch(`${API_BASE}/users/me/avatar`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${state.auth.token}`
+            },
+            body: formData
+          });
+          const uploadData = await readResponseData(uploadResponse);
+
+          if (!uploadResponse.ok) {
+            throw new Error(getResponseMessage(uploadResponse, uploadData, "Import de l'avatar impossible."));
+          }
+
+          document.getElementById("profile-avatar").value = uploadData.avatar;
+          document.getElementById("profile-avatar-display").src = normalizeAvatar(uploadData.user);
+          if (topAvatar) topAvatar.src = normalizeAvatar(uploadData.user);
+          showMessage("profile-message", "Avatar importe avec succes.", "success");
+        } catch (error) {
+          showMessage("profile-message", error.message, "error");
+        }
+      });
+
+      document.getElementById("logout-button")?.addEventListener("click", () => {
+        clearAuth();
+        if (state.socket) {
+          state.socket.disconnect();
+        }
+        window.location.href = "login.html";
+      });
+    } else {
+      const readonlySection = document.getElementById("profile-readonly-section");
+      if (readonlySection) readonlySection.classList.remove("hidden");
+
+      const createdAt = document.getElementById("profile-created-at");
+      if (createdAt && user.createdAt) {
+        createdAt.textContent = new Date(user.createdAt).toLocaleDateString("fr-FR", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric"
+        });
+      }
+
+      const onlineStatus = document.getElementById("profile-online-status");
+      if (onlineStatus) {
+        onlineStatus.textContent = user.isOnline ? "En ligne" : "Hors ligne";
+      }
+
+      const provider = document.getElementById("profile-provider");
+      if (provider) {
+        const providers = { local: "Email/Mot de passe", google: "Google", apple: "Apple" };
+        provider.textContent = providers[user.provider] || user.provider;
+      }
+    }
+  } catch (error) {
+    console.error("Profile error:", error);
+    window.location.href = "inbox.html";
   }
-
-  const user = data.user;
-  document.getElementById("profile-username").value = user.username;
-  document.getElementById("profile-email").value = user.email;
-  document.getElementById("profile-avatar").value = user.avatar || "";
-  renderProfilePreview(user);
-
-  document.getElementById("profile-avatar").addEventListener("input", () => {
-    renderProfilePreview({
-      ...user,
-      username: document.getElementById("profile-username").value,
-      avatar: document.getElementById("profile-avatar").value
-    });
-  });
-
-  document.getElementById("profile-username").addEventListener("input", () => {
-    renderProfilePreview({
-      ...user,
-      username: document.getElementById("profile-username").value,
-      avatar: document.getElementById("profile-avatar").value
-    });
-  });
-
-  document.getElementById("profile-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    try {
-      const saveResponse = await api("/users/me", {
-        method: "PUT",
-        body: JSON.stringify({
-          username: document.getElementById("profile-username").value,
-          avatar: document.getElementById("profile-avatar").value
-        })
-      });
-
-      const saveData = await readResponseData(saveResponse);
-      if (!saveResponse.ok) {
-        throw new Error(getResponseMessage(saveResponse, saveData, "Mise a jour du profil impossible."));
-      }
-
-      saveAuth({
-        ...state.auth,
-        user: saveData.user
-      });
-      showMessage("profile-message", saveData.message, "success");
-      renderProfilePreview(saveData.user);
-    } catch (error) {
-      showMessage("profile-message", error.message, "error");
-    }
-  });
-
-  document.getElementById("profile-avatar-file").addEventListener("change", async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("avatar", file);
-
-    try {
-      const uploadResponse = await fetch(`${API_BASE}/users/me/avatar`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${state.auth.token}`
-        },
-        body: formData
-      });
-      const uploadData = await readResponseData(uploadResponse);
-
-      if (!uploadResponse.ok) {
-        throw new Error(getResponseMessage(uploadResponse, uploadData, "Import de l'avatar impossible."));
-      }
-
-      document.getElementById("profile-avatar").value = uploadData.avatar;
-      renderProfilePreview({
-        ...state.auth.user,
-        avatar: uploadData.avatar,
-        username: document.getElementById("profile-username").value
-      });
-      showMessage("profile-message", "Avatar importe avec succes.", "success");
-    } catch (error) {
-      showMessage("profile-message", error.message, "error");
-    }
-  });
-
-  document.getElementById("logout-button").addEventListener("click", () => {
-    clearAuth();
-    if (state.socket) {
-      state.socket.disconnect();
-    }
-    window.location.href = "login.html";
-  });
 }
 
 function renderProfilePreview(user) {
   const preview = document.getElementById("profile-preview");
+  if (!preview) return;
   preview.innerHTML = "";
 
   const image = document.createElement("img");
@@ -967,8 +858,6 @@ async function bootstrap() {
   if (page === "inbox") await initInbox();
   if (page === "chat") await initChat();
   if (page === "profile") await initProfile();
-  if (page === "contact-profile") await initContactProfile();
 }
 
 bootstrap();
-
