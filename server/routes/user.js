@@ -81,18 +81,17 @@ router.post("/me/avatar", authMiddleware, upload.single("avatar"), async (req, r
 router.get("/contacts", authMiddleware, async (req, res) => {
   try {
     const search = (req.query.search || "").trim();
-    const query = {
-      _id: { $ne: req.user._id }
-    };
 
-    if (search) {
-      query.$or = [
-        { username: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } }
-      ];
+    if (!search) {
+      return res.json({ users: [] });
     }
 
-    const users = await User.find(query).sort({ isOnline: -1, username: 1 });
+    const query = {
+      _id: { $ne: req.user._id },
+      studentId: { $regex: new RegExp("^" + search + "$", "i") }
+    };
+
+    const users = await User.find(query);
     return res.json({ users: users.map((user) => user.toSafeObject()) });
   } catch (error) {
     return res.status(500).json({ message: "Impossible de charger les contacts." });

@@ -224,7 +224,9 @@
 <aside class="sidebar-nav hidden md:flex flex-col gap-1 w-64 h-full fixed left-0 top-0 pt-20 border-r border-zinc-100 bg-white text-sm font-medium">
 <div class="px-6 mb-8">
 <div class="flex items-center gap-3 mb-1">
-<div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white font-bold text-lg">E</div>
+<div class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden shrink-0 shadow-sm border border-zinc-100">
+<img src="Ressource/Logo.jpeg" alt="Logo ESTIM" class="w-full h-full object-cover">
+</div>
 <div>
 <h2 class="text-xl font-bold text-black leading-tight">ESTIM Chat</h2>
 <p class="text-zinc-500 text-[10px] uppercase tracking-wider">Messagerie</p>
@@ -261,7 +263,13 @@ Nouveau message
 <div id="conversation-list" class="space-y-1"></div>
 </div>
 <div class="p-4 border-t border-zinc-50">
-<div class="text-label-sm text-secondary uppercase tracking-wider mb-2">Contacts</div>
+<div class="text-label-sm text-secondary uppercase tracking-wider mb-2">Nouvelle discussion</div>
+<form id="contact-search-form" class="flex gap-2 mb-3">
+<input type="text" id="contact-search-input" placeholder="ID (ex: ES123)" class="w-full text-sm border-zinc-200 bg-surface-container-low rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-primary-container" autocomplete="off"/>
+<button type="submit" class="bg-primary-container text-primary px-3 rounded-lg flex items-center justify-center hover:brightness-105 transition-all">
+<span class="material-symbols-outlined text-sm font-bold">search</span>
+</button>
+</form>
 <div id="contact-list" class="space-y-1"></div>
 </div>
 </section>

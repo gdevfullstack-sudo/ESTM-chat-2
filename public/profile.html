@@ -166,7 +166,9 @@
 <aside class="sidebar-nav hidden md:flex flex-col gap-1 w-64 h-full fixed left-0 top-0 pt-20 border-r border-zinc-100 bg-white text-sm font-medium">
 <div class="px-6 mb-8">
 <div class="flex items-center gap-3 mb-1">
-<div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white font-bold text-lg">E</div>
+<div class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden shrink-0 shadow-sm border border-zinc-100">
+<img src="Ressource/Logo.jpeg" alt="Logo ESTIM" class="w-full h-full object-cover">
+</div>
 <div>
 <h2 class="text-xl font-bold text-black leading-tight">ESTIM Chat</h2>
 <p class="text-zinc-500 text-[10px] uppercase tracking-wider">Messagerie</p>
@@ -207,6 +209,9 @@ Nouveau message
 </div>
 <div class="flex-1 text-center md:text-left">
 <h1 id="profile-username-display" class="font-display text-display text-on-surface mb-1">...</h1>
+<div class="flex items-center gap-2 mb-2 justify-center md:justify-start">
+<span class="px-2 py-1 bg-zinc-100 rounded text-sm font-mono font-bold text-zinc-600" id="profile-studentid-display">...</span>
+</div>
 <p id="profile-email-display" class="font-headline-md text-secondary mb-4">...</p>
 <div class="flex flex-wrap gap-2 justify-center md:justify-start">
 <span id="profile-status-badge" class="px-3 py-1 bg-surface-container rounded-full text-xs font-label-bold text-on-surface-variant uppercase tracking-wider">...</span>
@@ -222,6 +227,9 @@ Nouveau message
 <span class="material-symbols-outlined text-sm">chat</span>
 Envoyer un message
 </a>
+<button id="profile-share-link" class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center active:scale-95 transition-transform shrink-0 shadow-sm" title="Copier le lien de discussion">
+<span class="material-symbols-outlined text-sm">share</span>
+</button>
 </div>
 <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-9xl opacity-10 text-primary">person</span>
 </div>

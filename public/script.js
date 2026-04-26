@@ -376,25 +376,19 @@ function getMessagePreviewLabel(message) {
   return message.message || "";
 }
 
-async function loadInbox(search = "") {
+async function loadInbox() {
   if (!requireAuth()) return;
   setupSocket();
 
-  const [contactsRes, conversationsRes, unreadRes] = await Promise.all([
-    api(`/users/contacts${search ? `?search=${encodeURIComponent(search)}` : ""}`),
+  const [conversationsRes, unreadRes] = await Promise.all([
     api("/users/conversations"),
     api("/users/unread-count")
   ]);
 
-  const [contactsData, conversationsData, unreadData] = await Promise.all([
-    readResponseData(contactsRes),
+  const [conversationsData, unreadData] = await Promise.all([
     readResponseData(conversationsRes),
     readResponseData(unreadRes)
   ]);
-
-  if (!contactsRes.ok) {
-    throw new Error(getResponseMessage(contactsRes, contactsData, "Chargement des contacts impossible."));
-  }
 
   if (!conversationsRes.ok) {
     throw new Error(
@@ -406,22 +400,16 @@ async function loadInbox(search = "") {
     throw new Error(getResponseMessage(unreadRes, unreadData, "Chargement des messages non lus impossible."));
   }
 
-  const contactList = document.getElementById("contact-list");
   const conversationList = document.getElementById("conversation-list");
   const unreadBadge = document.getElementById("global-unread-badge");
 
-  contactList.innerHTML = "";
-  conversationList.innerHTML = "";
+  if (conversationList) conversationList.innerHTML = "";
   if (unreadBadge) {
-    unreadBadge.textContent = unreadData.unreadCount ? `${unreadData.unreadCount} non lus` : "";
+    unreadBadge.textContent = unreadData.unreadCount ? String(unreadData.unreadCount) : "";
   }
 
-  contactsData.users.forEach((user) => {
-    contactList.appendChild(contactItemTemplate(user));
-  });
-
   conversationsData.conversations.forEach((conversation) => {
-    conversationList.appendChild(
+    if (conversationList) conversationList.appendChild(
       contactItemTemplate(
         conversation.user,
         {
@@ -433,12 +421,32 @@ async function loadInbox(search = "") {
     );
   });
 
-  if (!conversationList.children.length) {
+  if (conversationList && !conversationList.children.length) {
     conversationList.innerHTML = '<p class="message-box">Aucune conversation pour le moment.</p>';
   }
+}
 
-  if (!contactList.children.length) {
-    contactList.innerHTML = '<p class="message-box">Aucun contact correspondant.</p>';
+async function searchContact(studentId) {
+  const contactList = document.getElementById("contact-list");
+  if (!contactList) return;
+  contactList.innerHTML = '<p class="message-box">Recherche en cours...</p>';
+
+  try {
+    const res = await api(`/users/contacts?search=${encodeURIComponent(studentId)}`);
+    const data = await readResponseData(res);
+    
+    contactList.innerHTML = "";
+    if (!res.ok) throw new Error(getResponseMessage(res, data, "Erreur de recherche."));
+
+    if (data.users && data.users.length > 0) {
+      data.users.forEach(user => {
+        contactList.appendChild(contactItemTemplate(user));
+      });
+    } else {
+      contactList.innerHTML = '<p class="message-box is-error">Identifiant introuvable.</p>';
+    }
+  } catch(error) {
+    contactList.innerHTML = `<p class="message-box is-error">${error.message}</p>`;
   }
 }
 
@@ -464,16 +472,16 @@ async function initInbox() {
     }
   }
 
-  document.getElementById("contact-search")?.addEventListener("input", async (event) => {
-    try {
-      await loadInbox(event.target.value);
-    } catch (error) {
-      const conversationList = document.getElementById("conversation-list");
-      if (conversationList) {
-        conversationList.innerHTML = `<p class="message-box is-error">${error.message}</p>`;
+  const searchForm = document.getElementById("contact-search-form");
+  if (searchForm) {
+    searchForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.getElementById("contact-search-input");
+      if (input && input.value.trim()) {
+        searchContact(input.value.trim());
       }
-    }
-  });
+    });
+  }
 }
 
 async function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.8) {
@@ -790,6 +798,12 @@ async function initProfile() {
 
     document.getElementById("profile-username-display").textContent = user.username;
     document.getElementById("profile-email-display").textContent = user.email;
+    
+    const studentIdDisplay = document.getElementById("profile-studentid-display");
+    if (studentIdDisplay) {
+      studentIdDisplay.textContent = `ID: ${user.studentId || "N/A"}`;
+    }
+
     document.getElementById("profile-avatar-display").src = normalizeAvatar(user);
     document.getElementById("profile-avatar-display").alt = user.username;
 
@@ -819,6 +833,24 @@ async function initProfile() {
         chatLink.href = `chat.html?user=${user._id}`;
         chatLink.innerHTML = '<span class="material-symbols-outlined text-sm">chat</span>Envoyer un message';
       }
+    }
+
+    const shareLinkBtn = document.getElementById("profile-share-link");
+    if (shareLinkBtn) {
+      shareLinkBtn.addEventListener("click", () => {
+        const link = `${window.location.origin}/chat.html?user=${user._id}`;
+        navigator.clipboard.writeText(link).then(() => {
+          const msg = document.getElementById("profile-message");
+          if (msg) {
+            msg.textContent = "Lien copié dans le presse-papier !";
+            msg.className = "message-box is-success mt-6";
+            setTimeout(() => {
+              msg.textContent = "";
+              msg.className = "message-box mt-6";
+            }, 3000);
+          }
+        });
+      });
     }
 
     const topAvatar = document.getElementById("current-user-avatar-top");
