@@ -824,6 +824,11 @@ async function initProfile() {
         const providers = { local: "Email/Mot de passe", google: "Google", apple: "Apple" };
         provider.textContent = providers[user.provider] || user.provider;
       }
+
+      const studentId = document.getElementById("profile-student-id");
+      if (studentId) {
+        studentId.textContent = user.studentId || "Non attribué";
+      }
     }
   } catch (error) {
     console.error("Profile error:", error);
