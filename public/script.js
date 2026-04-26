@@ -476,9 +476,53 @@ async function initInbox() {
   });
 }
 
-function appendMessage(message) {
+async function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.8) {
+  if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          resolve(new File([blob], file.name, {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+          }));
+        }, 'image/jpeg', quality);
+      };
+    };
+  });
+}
+
+function appendMessage(message, isSending = false) {
   const list = document.getElementById("message-list");
   if (!list) return;
+
+  const existing = document.querySelector(`[data-message-id="${message._id}"]`) || 
+                   (message._tempId ? document.querySelector(`[data-message-id="${message._tempId}"]`) : null);
+  if (existing) {
+    existing.remove();
+  }
 
   const currentUserId = state.auth.user._id;
   const row = document.createElement("div");
@@ -494,7 +538,7 @@ function appendMessage(message) {
   }
 
   const bubble = document.createElement("div");
-  bubble.className = "message-bubble";
+  bubble.className = `message-bubble ${isSending ? 'sending' : ''}`;
 
   const content = document.createElement("div");
   if (message.message) {
@@ -524,8 +568,8 @@ function appendMessage(message) {
 
   const isOutgoing = String(message.senderId) === String(currentUserId);
   const stateLabel = document.createElement("div");
-  stateLabel.className = "message-state";
-  stateLabel.textContent = isOutgoing ? (message.isSeen ? "Vu" : "Envoye") : "";
+  stateLabel.className = `message-state ${isSending ? 'sending' : ''}`;
+  stateLabel.textContent = isOutgoing ? (isSending ? "Envoi en cours..." : (message.isSeen ? "Vu" : "Envoye")) : "";
 
   if (message.message) {
     bubble.appendChild(content);
@@ -570,6 +614,33 @@ async function initChat() {
   const input = document.getElementById("message-input");
   const mediaInput = document.getElementById("message-media");
 
+  const emojiBtn = document.getElementById("emoji-btn");
+  const emojiContainer = document.getElementById("emoji-picker-container");
+  const picker = document.querySelector("emoji-picker");
+
+  if (emojiBtn && emojiContainer && picker) {
+    emojiBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      emojiContainer.classList.toggle("hidden");
+    });
+
+    picker.addEventListener("emoji-click", (event) => {
+      const emoji = event.detail.unicode;
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      input.value = input.value.substring(0, start) + emoji + input.value.substring(end);
+      input.selectionStart = input.selectionEnd = start + emoji.length;
+      input.focus();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!emojiContainer.contains(e.target) && !emojiBtn.contains(e.target)) {
+        emojiContainer.classList.add("hidden");
+      }
+    });
+  }
+
   input.addEventListener("input", () => {
     state.socket.emit("typing:start", { receiverId: userId });
     clearTimeout(state.typingTimeout);
@@ -581,9 +652,39 @@ async function initChat() {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const value = input.value.trim();
-    const mediaFile = mediaInput.files[0];
+    let mediaFile = mediaInput.files[0];
 
     if (!value && !mediaFile) return;
+
+    input.value = "";
+    mediaInput.value = "";
+    showMessage("typing-indicator", "", "");
+    state.socket.emit("typing:stop", { receiverId: userId });
+
+    const tempId = 'temp-' + Date.now();
+    let tempImageUrl = "";
+    let tempVideoUrl = "";
+    
+    if (mediaFile) {
+      if (mediaFile.type.startsWith('image/')) {
+        tempImageUrl = URL.createObjectURL(mediaFile);
+        mediaFile = await compressImage(mediaFile);
+      }
+      if (mediaFile.type.startsWith('video/')) {
+        tempVideoUrl = URL.createObjectURL(mediaFile);
+      }
+    }
+
+    appendMessage({
+      _id: tempId,
+      senderId: state.auth.user._id,
+      receiverId: userId,
+      message: value,
+      imageUrl: tempImageUrl,
+      videoUrl: tempVideoUrl,
+      createdAt: new Date().toISOString(),
+      isSeen: false
+    }, true);
 
     const formData = new FormData();
     formData.append("receiverId", userId);
@@ -612,7 +713,9 @@ async function initChat() {
         throw new Error("La reponse du serveur est vide ou invalide.");
       }
 
-      appendMessage(sendData.message);
+      sendData.message._tempId = tempId;
+      appendMessage(sendData.message, false);
+      
       if (state.socket) {
         state.socket.emit("message:send", {
           receiverId: userId,
@@ -624,14 +727,10 @@ async function initChat() {
         });
       }
     } catch (error) {
+      const row = document.querySelector(`[data-message-id="${tempId}"]`);
+      if (row) row.remove();
       showMessage("typing-indicator", error.message, "error");
-      return;
     }
-
-    showMessage("typing-indicator", "", "");
-    input.value = "";
-    mediaInput.value = "";
-    state.socket.emit("typing:stop", { receiverId: userId });
   });
 }
 

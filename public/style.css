@@ -3800,3 +3800,7 @@ body[data-page="register"] {
     width: 100%;
   }
 }
+
+.message-bubble.sending { opacity: 0.6; transition: opacity 0.3s; }
+.message-state.sending { font-style: italic; }
+
